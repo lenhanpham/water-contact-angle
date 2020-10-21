@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[432]:
-
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -45,9 +42,6 @@ highest_point = v[maxzc_index[0],:]
 center_line = trans_dens[:,maxzc_index[0]]
 
 
-# In[433]:
-
-
 ### Plot mass density along the totally symmetric axis of the droplet ######
 
 plt.figure(1, figsize = (24,12))
@@ -56,9 +50,6 @@ axes.set_xlim([1,5])
 
 
 center_libe_plot = plt.scatter(z, center_line, marker = "o", s=200, facecolors='none', edgecolors='b')
-
-
-# In[434]:
 
 
 ####Fitting#####
@@ -86,15 +77,8 @@ print(np.sqrt(np.diag(params_covariance)))
 #zfit_index1[0]
 
 
-# In[386]:
-
-
 np.where(np.isclose(z, 2.3))
 #np.where(np.isclose(z, 6.0))
-
-
-# In[436]:
-
 
 plt.figure(1, figsize = (20,10))
 axes = plt.gca()
@@ -108,10 +92,6 @@ cir = masscontour.collections[0].get_paths()[0]
 circle = cir.vertices
 circle[:,:]
 
-
-# In[437]:
-
-
 #### select contour which is at least 2.3 nm above the surface to remove noise from layers which are too close to the surface
 
 zfit_index = np.where(circle == 2.30)
@@ -119,9 +99,6 @@ start_index = zfit_index[0][0]
 stop_index = zfit_index[0][-1]
 
 print(zfit_index)
-
-
-# In[438]:
 
 
 ####Fitting Circle#####
@@ -148,10 +125,6 @@ print(np.sqrt(np.diag(pars_covariance)))
 
 #print(ycirfitteddata)
 
-
-# In[417]:
-
-
 #### Plot the fitted circle #####
 
 circle = plt.figure(1, figsize = (20,20))
@@ -162,9 +135,6 @@ axes.set_ylim([1.5,4])
 axes.set_aspect(1)
 axes.add_artist(draw_circle)
 axes.set_title('Fitted Circle', fontsize = 25)
-
-
-# In[450]:
 
 
 #### Plot the fitted circle and the droplet contour to check the fitted result
@@ -188,9 +158,6 @@ center_dense = trans_dens[:, max_height_index[0][0]]
 
 ### uncomment this lien to get the 1-dimension density matrix along the totally symmetric axis of the droplet
 #center_dense
-
-
-# In[453]:
 
 
 ### Calculate the contact angle 
