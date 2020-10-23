@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable 
 import numpy as np
-import pandas as pd
+#import pandas as pd
 
 
 #densmap = np.loadtxt('E:\Projects\MoS2\MD\Droplet\output\\densmap.dat')
