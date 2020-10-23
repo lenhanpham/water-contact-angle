@@ -1,55 +1,81 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+
 import matplotlib.pyplot as plt
+from matplotlib import cm
+from mpl_toolkits.axes_grid1 import make_axes_locatable 
 import numpy as np
 import pandas as pd
-from skimage import measure
 
-densmap = np.loadtxt('E:\Projects\MoS2\MD\Droplet\output\\densmap.dat')
+
+#densmap = np.loadtxt('E:\Projects\MoS2\MD\Droplet\output\\densmap.dat')
+densmap = np.loadtxt('E:\Projects\MoS2\MD\Droplet\\3000\densmap-3000.dat')
+
 
 to_kg_m3=((18.01528)*(10**-3))/((6.022*10**23)*(10**-27)) 
 densmass =  densmap*to_kg_m3 
 
+### width of simulation space###
 x = densmap[1:-1,0]
+
+###height of simulation space ###
 z = densmap[0,1:-1]
 dens = densmass[1:-1, 1:-1]
 
 trans_dens =  np.transpose(dens)
 
-plt.figure(1, figsize = (20,10))
-axes = plt.gca()
-axes.set_xlim([10,19])
-axes.set_ylim([1.5,4])
-axes.set_aspect(1)
+##### Plot droplet #####
+def plot_droplet():
+    plt.figure(1, figsize = (20,10))
+    axes = plt.gca()
+    axes.set_xlim([1,12])
+    axes.set_ylim([1.5,5])
+    axes.set_aspect(1)
+    masscontour = plt.contour(x, z , trans_dens, 100, cmap = cm.jet)
+    droplet = plt.imshow(trans_dens, extent=[0, 12, 0, 5], origin='lower', cmap=cm.jet)
+    # create an axes on the right side of ax. The width of cax will be 5%
+    # of ax and the padding between cax and ax will be fixed at 0.05 inch.
+    divider = make_axes_locatable(axes)
+    cax = divider.append_axes("right", size="5%", pad=0.1) 
+    plt.colorbar(droplet, cax = cax)
 
-masscontour = plt.contour(x, z , trans_dens, levels = [300])
-
-p = masscontour.collections[0].get_paths()[0]
-
-v = p.vertices
-xc = v[:,0]
-zc = v[:,1]
+plot_droplet() 
 
 
+maxdens_idx = np.argmax(trans_dens, axis = None)
 
-maxzc = np.amax(v[:,1])
+maxdens_idx = np.unravel_index(maxdens_idx, trans_dens.shape)
 
-maxzc_index = np.where(v == maxzc)
+print(maxdens_idx[1])
 
-highest_point = v[maxzc_index[0],:] 
 
-center_line = trans_dens[:,maxzc_index[0]]
+
+### look for the nearest values of max contour maxzc in mass density matrix ###
+
+#def find_nearest(a, a0):
+#    "Element in nd array `a` closest to the scalar value `a0`"
+#    idx = np.abs(a - a0).argmin()
+#    return a.flat[idx]
+ 
+#maxzc_in_densmass  = find_nearest(trans_dens, maxzc)
+
+#maxzc_idx = np.where(trans_dens == maxzc_in_densmass)
+
+center_line = trans_dens[:,maxdens_idx[1]]
+
+print(center_line)
 
 
 ### Plot mass density along the totally symmetric axis of the droplet ######
 
 plt.figure(1, figsize = (24,12))
 axes = plt.gca()
-axes.set_xlim([1,5])
+axes.set_xlim([0,6])
 
 
-center_libe_plot = plt.scatter(z, center_line, marker = "o", s=200, facecolors='none', edgecolors='b')
+center_line_plot = plt.scatter(z, center_line, marker = "o", s=200, facecolors='none', edgecolors='b')
+
 
 
 ####Fitting#####
@@ -60,10 +86,10 @@ def density_func(x, a, b, c):
 
 density_line = np.transpose(center_line).flatten() 
 
-zfit_index1 = np.where(z == 2.3)
+zfit_index1 = np.where(z == 2.44)
 zfit_index2 = np.where(z == 6.0)
 
-params, params_covariance = optimize.curve_fit(f = density_func, xdata = z[zfit_index1[0][0]:zfit_index2[0][0]], ydata = density_line[zfit_index1[0][0]:300], p0=[400, 8, 5])
+params, params_covariance = optimize.curve_fit(f = density_func, xdata = z[zfit_index1[0][0]:zfit_index2[0][0]], ydata = density_line[zfit_index1[0][0]:300], p0=[542, 4, 1])
 
 yfitteddata = density_func(z, params[0], params[1], params[2])
 
@@ -77,28 +103,28 @@ print(np.sqrt(np.diag(params_covariance)))
 #zfit_index1[0]
 
 
-np.where(np.isclose(z, 2.3))
-#np.where(np.isclose(z, 6.0))
 
 plt.figure(1, figsize = (20,10))
 axes = plt.gca()
-axes.set_xlim([10,19])
-axes.set_ylim([1.5,4])
+axes.set_xlim([1,12])
+axes.set_ylim([1.5,5])
 axes.set_aspect(1)
-masscontour = plt.contour(x, z , trans_dens, levels = [537])
+masscontour = plt.contour(x, z , trans_dens, levels = [params[0]])
 
 cir = masscontour.collections[0].get_paths()[0]
 
 circle = cir.vertices
-circle[:,:]
+#circle 
+
 
 #### select contour which is at least 2.3 nm above the surface to remove noise from layers which are too close to the surface
 
-zfit_index = np.where(circle == 2.30)
+zfit_index = np.where(circle == 2.4)
 start_index = zfit_index[0][0]
 stop_index = zfit_index[0][-1]
 
-print(zfit_index)
+print(start_index, stop_index)
+
 
 
 ####Fitting Circle#####
@@ -109,7 +135,7 @@ def circle_func(x, a, b, c):
 
 
 
-pars, pars_covariance = optimize.curve_fit(f = circle_func, xdata = circle[start_index:stop_index,0], ydata = circle[start_index:stop_index,1], p0=[14, 1, 5])
+pars, pars_covariance = optimize.curve_fit(f = circle_func, xdata = circle[start_index:stop_index,0], ydata = circle[start_index:stop_index,1], p0=[6, -0.5, 5])
 
 ycirfitteddata = circle_func(circle[start_index:stop_index,0], params[0], params[1], params[2])
 
@@ -125,9 +151,10 @@ print(np.sqrt(np.diag(pars_covariance)))
 
 #print(ycirfitteddata)
 
+
 #### Plot the fitted circle #####
 
-circle = plt.figure(1, figsize = (20,20))
+fittedcircle = plt.figure(1, figsize = (20,20))
 draw_circle = plt.Circle((14.33974065, -0.79343233), 4.08972749, color='b', fill=False)
 axes = plt.gca()
 axes.set_xlim([10,19])
@@ -137,32 +164,21 @@ axes.add_artist(draw_circle)
 axes.set_title('Fitted Circle', fontsize = 25)
 
 
+
 #### Plot the fitted circle and the droplet contour to check the fitted result
 
 plt.figure(1, figsize = (20,20))
-draw_circle = plt.Circle((14.33974065, -0.79343233), 4.08972749, color='b', fill=False)
+draw_circle = plt.Circle((pars[0], pars[1]), pars[2], color='b', fill=False)
 ax = plt.gca()
-ax.set_xlim([10,19])
-ax.set_ylim([1.5,4])
+axes.set_xlim([1,12])
+axes.set_ylim([1.5,5])
 ax.set_aspect(1)
 ax.add_artist(draw_circle)
-crl = plt.plot(circle[start_index-150:stop_index+150,0], circle[start_index-150:stop_index+150,1])
-max_height = np.amax(circle[start_index:stop_index,1])
+crl = plt.plot(circle[start_index-150:stop_index+150,0], circle[start_index-150:stop_index+150,1], color = 'red')
 
-max_height_index = np.where(circle == max_height)
-
-center_dense = trans_dens[:, max_height_index[0][0]]
-
-#### uncomment this line to get index of z density along the totally symmetric axis of the droplet 
-#np.where(center_dense == np.amin(center_dense, 0))
-
-### uncomment this lien to get the 1-dimension density matrix along the totally symmetric axis of the droplet
-#center_dense
 
 
 ### Calculate the contact angle 
-
-
 import sympy as sp
 
 x = sp.Symbol('x')
@@ -177,24 +193,26 @@ xvalues = sp.solve(sp.sqrt(c**2 - (x - a)**2) + b -1.7)
 
 base = (sp.Abs(xvalues[1] - xvalues[0]))/2
 
-print(xvalues)
+#print(xvalues)
 
 
 height = b + c - 1.7 
 
-print(height)
 
 theta = sp.asin((2*height*base)/(base**2 + height**2))
 
 theta_degree = sp.N(sp.deg(theta), 4)
 
 
+print("The height of the droplet: ")
+
+print(height,  "\n")
+
 print("The base distance: ")
 print(base, "\n")
 
 print("Contact angle: ")
 print(theta_degree)
-
 
 
 
