@@ -6,12 +6,13 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable 
 import numpy as np
-#import pandas as pd
+import pandas as pd
 
 
 #densmap = np.loadtxt('E:\Projects\MoS2\MD\Droplet\output\\densmap.dat')
 densmap = np.loadtxt('E:\Projects\MoS2\MD\Droplet\\3000\densmap-3000.dat')
 
+### convert number density to mass density ####
 
 to_kg_m3=((18.01528)*(10**-3))/((6.022*10**23)*(10**-27)) 
 densmass =  densmap*to_kg_m3 
@@ -21,8 +22,12 @@ x = densmap[1:-1,0]
 
 ###height of simulation space ###
 z = densmap[0,1:-1]
+
+#### Extract the mass density values by removing the width and the height in the number density matrix #### 
 dens = densmass[1:-1, 1:-1]
 
+
+##### Rotate the droplet mass density to plot it ######
 trans_dens =  np.transpose(dens)
 
 ##### Plot droplet #####
@@ -42,9 +47,7 @@ def plot_droplet():
 
 plot_droplet() 
 
-
-
-### Look for the most dense point and then determine the totally symmetric axis of the droplet #####
+### Look for the densest point and then determine the totally symmetric axis of the droplet #####
 
 maxdens_idx = np.argmax(trans_dens, axis = None)
 
@@ -52,7 +55,7 @@ maxdens_idx = np.unravel_index(maxdens_idx, trans_dens.shape)
 
 print(maxdens_idx[1])
 
-
+#### Mass density of the totally symmetric axis of droplet 
 center_line = trans_dens[:,maxdens_idx[1]]
 
 print(center_line)
@@ -69,7 +72,7 @@ center_line_plot = plt.scatter(z, center_line, marker = "o", s=200, facecolors='
 
 
 
-####Fitting#####
+####Fitting mass density #####
 from scipy import optimize
 
 def density_func(x, a, b, c):
