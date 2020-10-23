@@ -175,13 +175,13 @@ axes.set_title('Fitted Circle', fontsize = 25)
 
 #### Plot the fitted circle and the droplet contour to check the fitted result
 
-plt.figure(1, figsize = (20,20))
+plt.figure(5, figsize = (figuresize[0], figuresize[1]))
+axes = plt.gca()
+axes.set_xlim([x_minmax[0],x_minmax[1]])
+axes.set_ylim([y_minmax[0],y_minmax[1]])
+axes.set_aspect(1)
 draw_circle = plt.Circle((pars[0], pars[1]), pars[2], color='b', fill=False)
-ax = plt.gca()
-axes.set_xlim([1,12])
-axes.set_ylim([1.5,5])
-ax.set_aspect(1)
-ax.add_artist(draw_circle)
+axes.add_artist(draw_circle)
 crl = plt.plot(circle[start_index-150:stop_index+150,0], circle[start_index-150:stop_index+150,1], color = 'red')
 
 
