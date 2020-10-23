@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable 
 import numpy as np
-import pandas as pd
+#import pandas as pd
 
 
-#densmap = np.loadtxt('E:\Projects\MoS2\MD\Droplet\output\\densmap.dat')
-densmap = np.loadtxt('E:\Projects\MoS2\MD\Droplet\\3000\densmap-3000.dat')
+droplet_size = 1500
+cell=[26.26790,22.74867,22.00000 ]
+shift = 3 
 
-### convert number density to mass density ####
+densmap = np.loadtxt(f'E:\Projects\MoS2\MD\Droplet\{droplet_size}\densmap-{droplet_size}.dat')
+
+
 to_kg_m3=((18.01528)*(10**-3))/((6.022*10**23)*(10**-27)) 
 densmass =  densmap*to_kg_m3 
 
-### width of simulation space###
-x = densmap[1:-1,0]
 
 ###height of simulation space ###
 z = densmap[0,1:-1]
@@ -25,56 +25,59 @@ z = densmap[0,1:-1]
 #### Extract the mass density values by removing the width and the height in the number density matrix #### 
 dens = densmass[1:-1, 1:-1]
 
-
 ##### Rotate the droplet mass density to plot it ######
 trans_dens =  np.transpose(dens)
 
+### width of simulation space### 
+x = densmap[1:-1,0]  + shift 
+
+
+### Determine the center point of droplet with densest mass density ####
+maxdens_idx = np.argmax(trans_dens, axis = None)
+
+maxdens_idx = np.unravel_index(maxdens_idx, trans_dens.shape)
+
+print(maxdens_idx)
+
+
+center_line = trans_dens[:,maxdens_idx[1]]
+
+
+### Shift the part of droplets to make a whole droplet in the box #####
+xshift = np.empty(x.size)
+for i in range(x.size):
+    if x[i] > cell[0]:
+        xshift[i] = x[i] - cell[0] - x[maxdens_idx[1]]
+    else:
+        xshift[i] = x[i] - x[maxdens_idx[1]] 
+    
+    
+    
+##### Plot droplet #####
+
 figuresize = [20, 10]
-x_minmax = [1.0, 12]
+x_minmax = [-8, 8]
 y_minmax = [1.5, 5.0]
 
-
-
-##### Plot droplet #####
 def plot_droplet():
     plt.figure(1, figsize = (figuresize[0], figuresize[1]))
     axes = plt.gca()
     axes.set_xlim([x_minmax[0],x_minmax[1]])
     axes.set_ylim([y_minmax[0],y_minmax[1]])
     axes.set_aspect(1)
-    masscontour = plt.contour(x, z , trans_dens, 100, cmap = cm.jet)
-    droplet = plt.imshow(trans_dens, origin='lower', cmap=cm.jet)
+    masscontour = plt.contour(xshift, z , trans_dens, 50, cmap='jet', origin='lower')
+    #masscontour = plt.contourf(xshift, z , trans_dens, )
+    droplet = plt.imshow(trans_dens, extent = [x_minmax[0]*10,x_minmax[1]*10,y_minmax[0],y_minmax[1]], origin = 'lower', aspect = 'equal', cmap='jet', interpolation='bilinear')
     # create an axes on the right side of ax. The width of cax will be 5%
     # of ax and the padding between cax and ax will be fixed at 0.05 inch.
     divider = make_axes_locatable(axes)
     cax = divider.append_axes("right", size="5%", pad=0.1) 
-    plt.colorbar(droplet, cax = cax)
+    plt.colorbar(masscontour,cax = cax)
 
+    
 plot_droplet() 
 
 
-maxdens_idx = np.argmax(trans_dens, axis = None)
-
-maxdens_idx = np.unravel_index(maxdens_idx, trans_dens.shape)
-
-print(maxdens_idx[1])
-
-
-
-### look for the nearest values of max contour maxzc in mass density matrix ###
-
-#def find_nearest(a, a0):
-#    "Element in nd array `a` closest to the scalar value `a0`"
-#    idx = np.abs(a - a0).argmin()
-#    return a.flat[idx]
- 
-#maxzc_in_densmass  = find_nearest(trans_dens, maxzc)
-
-#maxzc_idx = np.where(trans_dens == maxzc_in_densmass)
-
-center_line = trans_dens[:,maxdens_idx[1]]
-
-print(center_line)
 
 
 ### Plot mass density along the totally symmetric axis of the droplet ######
@@ -95,7 +98,7 @@ def density_func(x, a, b, c):
 
 density_line = np.transpose(center_line).flatten() 
 
-zfit_index1 = np.where(z == 2.44)
+zfit_index1 = np.where(z == 2.4)
 zfit_index2 = np.where(z == 6.0)
 
 params, params_covariance = optimize.curve_fit(f = density_func, xdata = z[zfit_index1[0][0]:zfit_index2[0][0]], ydata = density_line[zfit_index1[0][0]:300], p0=[542, 4, 1])
@@ -117,7 +120,7 @@ axes = plt.gca()
 axes.set_xlim([x_minmax[0],x_minmax[1]])
 axes.set_ylim([y_minmax[0],y_minmax[1]])
 axes.set_aspect(1)
-masscontour = plt.contour(x, z , trans_dens, levels = [params[0]])
+masscontour = plt.contour(xshift, z , trans_dens, levels = [params[0]])
 
 cir = masscontour.collections[0].get_paths()[0]
 
@@ -135,7 +138,6 @@ stop_index = zfit_index[0][-1]
 print(start_index, stop_index)
 
 
-
 ####Fitting Circle#####
 from scipy import optimize 
 
@@ -144,7 +146,7 @@ def circle_func(x, a, b, c):
 
 
 
-pars, pars_covariance = optimize.curve_fit(f = circle_func, xdata = circle[start_index:stop_index,0], ydata = circle[start_index:stop_index,1], p0=[6, -0.5, 5])
+pars, pars_covariance = optimize.curve_fit(f = circle_func, xdata = circle[start_index:stop_index,0], ydata = circle[start_index:stop_index,1], p0=[0, -2, 5], maxfev = 5000)
 
 ycirfitteddata = circle_func(circle[start_index:stop_index,0], params[0], params[1], params[2])
 
@@ -161,6 +163,7 @@ print(np.sqrt(np.diag(pars_covariance)))
 #print(ycirfitteddata)
 
 
+
 #### Plot the fitted circle #####
 
 fittedcircle = plt.figure(3, figsize = (figuresize[0], figuresize[1]))
@@ -171,6 +174,7 @@ axes.set_aspect(1)
 draw_circle = plt.Circle((pars[0], pars[1]), pars[2], color='b', fill=False)
 axes.add_artist(draw_circle)
 axes.set_title('Fitted Circle', fontsize = 25)
+
 
 
 #### Plot the fitted circle and the droplet contour to check the fitted result
@@ -195,16 +199,18 @@ a = pars[0]
 b = pars[1]   
 c = pars[2]   
 
+#### height of the substrate 
+h = 1.7 
 
 #### 1.7 nm is the thickess of the MoS2 surface 
-xvalues = sp.solve(sp.sqrt(c**2 - (x - a)**2) + b -1.7)
+xvalues = sp.solve(sp.sqrt(c**2 - (x - a)**2) + b - h)
 
 base = (sp.Abs(xvalues[1] - xvalues[0]))/2
 
 #print(xvalues)
 
 
-height = b + c - 1.7 
+height = b + c - h 
 
 
 theta = sp.asin((2*height*base)/(base**2 + height**2))
@@ -221,4 +227,8 @@ print(base, "\n")
 
 print("Contact angle: ")
 print(theta_degree)
+
+
+
+
 
