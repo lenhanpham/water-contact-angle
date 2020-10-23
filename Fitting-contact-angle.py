@@ -43,24 +43,15 @@ def plot_droplet():
 plot_droplet() 
 
 
+
+### Look for the most dense point and then determine the totally symmetric axis of the droplet #####
+
 maxdens_idx = np.argmax(trans_dens, axis = None)
 
 maxdens_idx = np.unravel_index(maxdens_idx, trans_dens.shape)
 
 print(maxdens_idx[1])
 
-
-
-### look for the nearest values of max contour maxzc in mass density matrix ###
-
-#def find_nearest(a, a0):
-#    "Element in nd array `a` closest to the scalar value `a0`"
-#    idx = np.abs(a - a0).argmin()
-#    return a.flat[idx]
- 
-#maxzc_in_densmass  = find_nearest(trans_dens, maxzc)
-
-#maxzc_idx = np.where(trans_dens == maxzc_in_densmass)
 
 center_line = trans_dens[:,maxdens_idx[1]]
 
