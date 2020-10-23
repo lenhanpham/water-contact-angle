@@ -43,7 +43,7 @@ def plot_droplet():
     axes.set_ylim([y_minmax[0],y_minmax[1]])
     axes.set_aspect(1)
     masscontour = plt.contour(x, z , trans_dens, 100, cmap = cm.jet)
-    droplet = plt.imshow(trans_dens, extent=[0, 12, 0, 5], origin='lower', cmap=cm.jet)
+    droplet = plt.imshow(trans_dens, origin='lower', cmap=cm.jet)
     # create an axes on the right side of ax. The width of cax will be 5%
     # of ax and the padding between cax and ax will be fixed at 0.05 inch.
     divider = make_axes_locatable(axes)
