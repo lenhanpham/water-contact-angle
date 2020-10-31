@@ -90,7 +90,7 @@ def plot_droplet():
         cmap="jet",
         interpolation="bilinear",
     )
-    # create an axes on the right side of ax. The width of cax will be 5%
+    # create an axis on the right side of ax. The width of cax will be 5%
     # of ax and the padding between cax and ax will be fixed at 0.05 inch.
     divider = make_axes_locatable(axes)
     cax = divider.append_axes("right", size="5%", pad=0.1)
