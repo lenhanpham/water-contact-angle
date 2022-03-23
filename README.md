@@ -13,8 +13,8 @@ Reproduction of the Experimental Water Contact Angle Enough?* **Chem. Commun.**
 
 All parameters in the Chem. Commun. Paper above should be used in MoSu-CHARMM for simulations of biological molecules adsorbed on the MoS<sub>2</sub> surface. All information about MoSu-CHARMM can be found in the following paper:
 
-**Pham, L. N.; Walsh, T.** *Predicting Biomolecule Adsorption
+"**Pham, L. N.; Walsh, T.** *Predicting Biomolecule Adsorption
 on MoS<sub>2</sub> Nanosheets with High Structural Fidelity.* **Chem. Sci.** ***2022***
-[doi:10.1039/D1SC06814H](https://doi.org/10.1039/D1SC06814H)
+[doi:10.1039/D1SC06814H](https://doi.org/10.1039/D1SC06814H)"
 
 ### *Please cite all two papers above if you use MoSu-CHARMM in your works
